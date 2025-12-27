@@ -422,10 +422,3 @@ if ! command -v starship &> /dev/null; then
     PROMPT='%F{blue}%~%f %F{green}❯%f '
 fi
 
-# ===============================================
-# Welcome Message
-# ===============================================
-echo "🚀 ZSH loaded - Arch Linux edition"
-if command -v fastfetch &> /dev/null; then
-    fastfetch
-fi
