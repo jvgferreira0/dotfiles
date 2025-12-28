@@ -4,10 +4,25 @@
 # ===============================================
 
 # ===============================================
+# Shell Behavior
+# ===============================================
+# Allow comments in interactive shell
+setopt INTERACTIVE_COMMENTS
+
+# Characters considered part of a word
+WORDCHARS='*?_[]~=&;!#$%^(){}<>'
+
+# ===============================================
 # PATH Configuration
 # ===============================================
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
+
+# Sophia Techne (if installed)
+if [ -d "$HOME/.local/share/sophia-techne" ]; then
+    export SOPHIA_TECHNE_PATH="$HOME/.local/share/sophia-techne"
+    export PATH="$SOPHIA_TECHNE_PATH/bin:$PATH"
+fi
 
 # Mise (if installed)
 if command -v mise &> /dev/null; then
@@ -350,6 +365,14 @@ alias ga='git add'
 alias gc='git commit'
 alias gp='git push'
 alias gl='git log --oneline'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+
+# Git SSH Key Management
+# Uncomment and customize for your SSH keys:
+# alias gh-my='ssh-add -D ~/.ssh/id_rsa'
+# alias gh-work='ssh-add -D ~/.ssh/id_ed25519_work'
 
 # ===============================================
 # Music Download Aliases (yt-dlp)
@@ -409,15 +432,22 @@ if command -v mpd &> /dev/null && ! pgrep -x mpd > /dev/null 2>&1; then
 fi
 
 # ===============================================
-# Prompt (Starship or Simple)
+# Sophia Techne Integration (Optional)
 # ===============================================
-# If you want to use starship prompt:
-# if command -v starship &> /dev/null; then
-#     eval "$(starship init zsh)"
+# Source Sophia Techne defaults if installed
+# NOTE: Currently not installed - uncomment when/if you install it
+# if [ -f ~/.local/share/sophia-techne/default/zsh/rc ]; then
+#     source ~/.local/share/sophia-techne/default/zsh/rc
 # fi
 
-# Simple colored prompt (fallback)
-if ! command -v starship &> /dev/null; then
+# ===============================================
+# Prompt (Starship or Simple)
+# ===============================================
+# Use starship prompt if available
+if command -v starship &> /dev/null; then
+    eval "$(starship init zsh)"
+else
+    # Simple colored prompt (fallback)
     autoload -Uz colors && colors
     PROMPT='%F{blue}%~%f %F{green}❯%f '
 fi
