@@ -1,0 +1,713 @@
+# ===============================================
+# Complete .zshrc Configuration - FIXED VERSION
+# ===============================================
+
+# ===============================================
+# Tmux Auto-Start - DISABLED
+# ===============================================
+# Automatically attach to tmux session or create new one
+# if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
+#   # Check if running in Alacritty or other supported terminal
+#   if [ -n "$TERM" ]; then
+#     tmux attach -t default || tmux new -s default
+#   fi
+# fi
+
+# Custom history navigation functions with cursor at end
+# TEMPORARILY DISABLED TO TEST CTRL+R CONFLICT
+up-history-end-of-line() {
+    zle up-line-or-history
+    zle end-of-line
+}
+
+down-history-end-of-line() {
+    zle down-line-or-history
+    zle end-of-line
+}
+
+# Register the functions as ZLE widgets
+zle -N up-history-end-of-line
+zle -N down-history-end-of-line
+
+# Bind to arrow keys
+bindkey '^[[A' up-history-end-of-line    # Up arrow
+bindkey '^[[B' down-history-end-of-line  # Down arrow
+
+# ===============================================
+# FZF Configuration - NO OPTIONS TO FIX SYNTAX ERROR
+# ===============================================
+
+# NO FZF ENVIRONMENT VARIABLES - THESE WERE CAUSING THE ERROR
+# All FZF_*_OPTS variables removed to fix syntax error
+
+# ===============================================
+# FZF Setup - After running $(brew --prefix)/opt/fzf/install
+# ===============================================
+
+# If you ran the FZF install script, this should exist
+if [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
+  # echo "✅ Loaded FZF from ~/.fzf.zsh"
+else
+  # Check multiple possible FZF locations
+  FZF_SHELL_PATHS=(
+    ~/.fzf.zsh
+    /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+    /opt/homebrew/share/fzf/shell/key-bindings.zsh
+    /usr/local/opt/fzf/shell/key-bindings.zsh
+  )
+
+  FZF_FOUND=false
+  for path in "${FZF_SHELL_PATHS[@]}"; do
+    if [ -f "$path" ]; then
+      echo "✅ Found FZF at: $path"
+      if [[ "$path" == *"key-bindings.zsh" ]]; then
+        source "$path"
+        # Also load completion if it exists
+        completion_path="${path/key-bindings/completion}"
+        [ -f "$completion_path" ] && source "$completion_path"
+      else
+        source "$path"
+      fi
+      FZF_FOUND=true
+      break
+    fi
+  done
+
+  # If no FZF shell integration found, create our own
+  if [ "$FZF_FOUND" = false ]; then
+    echo "⚠️  No FZF shell integration found. Creating manual implementation..."
+    
+    # Manual FZF history widget - SIMPLIFIED
+    fzf-history-widget() {
+      local selected
+      selected=$(fc -rl 1 | awk '{$1=""; print substr($0,2)}' | fzf --query="$LBUFFER")
+      if [[ -n "$selected" ]]; then
+        BUFFER="$selected"
+        CURSOR=${#BUFFER}
+      fi
+      zle reset-prompt
+    }
+    zle -N fzf-history-widget
+    bindkey '^R' fzf-history-widget
+    
+    # Enhanced FZF file widget with better preview
+    fzf-file-widget() {
+      local selected
+      selected=$(find . -type f 2>/dev/null | 
+        fzf --preview='
+          if [[ -f {} ]]; then
+            file_type=$(file --mime-type -b {} 2>/dev/null || echo "unknown")
+            case $file_type in
+              text/*|application/json|application/xml)
+                if command -v bat > /dev/null 2>&1; then
+                  bat --color=always --line-range :100 {}
+                else
+                  head -100 {}
+                fi
+                ;;
+              *)
+                echo "📎 $(basename {})"
+                echo "Type: $file_type"
+                ls -la {}
+                ;;
+            esac
+          fi
+        ' --preview-window='right:50%')
+      if [[ -n "$selected" ]]; then
+        BUFFER="$BUFFER$selected"
+        CURSOR=${#BUFFER}
+      fi
+      zle reset-prompt
+    }
+    zle -N fzf-file-widget
+    bindkey '^T' fzf-file-widget
+    
+    # Enhanced FZF cd widget using configured options
+    fzf-cd-widget() {
+      local selected
+      selected=$(find . -type d 2>/dev/null | 
+        FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" fzf)
+      if [[ -n "$selected" ]]; then
+        cd "$selected"
+      fi
+      zle reset-prompt
+    }
+    zle -N fzf-cd-widget
+    bindkey '^[c' fzf-cd-widget  # Alt+C (Option+C on Mac)
+    bindkey '^G' fzf-cd-widget   # Alternative: Ctrl+G
+    
+    # echo "✅ Created manual FZF widgets"
+  fi
+fi
+
+# echo "FZF setup complete. Ctrl+R should now work!"
+
+# ===============================================
+# Custom FZF Functions
+# ===============================================
+
+# Enhanced file finder with cd capability
+fcd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
+}
+
+# Git branch switcher
+fgb() {
+  local branches branch
+  branches=$(git branch -vv) &&
+  branch=$(echo "$branches" | fzf +m) &&
+  git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
+}
+
+# Process killer
+fkill() {
+  local pid
+  if [ "$UID" != "0" ]; then
+    pid=$(ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
+  else
+    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+  fi
+
+  if [ "x$pid" != "x" ]; then
+    echo $pid | xargs kill -${1:-9}
+  fi
+}
+
+# ===============================================
+# Additional ZSH Configuration (Optional)
+# ===============================================
+
+# History settings
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+
+# Basic ZSH options
+setopt AUTO_CD
+setopt CORRECT
+#setopt CORRECT_ALL
+setopt NO_CASE_GLOB
+setopt NUMERIC_GLOB_SORT
+setopt EXTENDED_GLOB
+
+# Completion system
+autoload -Uz compinit
+compinit
+
+# Enable case-insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+# Colorful completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# Menu-style completion
+zstyle ':completion:*' menu select
+
+# ===============================================
+# Aliases (Optional but useful)
+# ===============================================
+
+# Better ls with colors
+#alias ls='ls --color=auto'
+#alias ll='ls -alF'
+#alias la='ls -A'
+#alias l='ls -CF'
+
+# Better grep
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# Safety nets
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Quick navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias c='clear'
+
+# Git shortcuts
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline'
+
+# ===============================================
+# End of Configuration
+# ===============================================
+
+# Version tracking for updates
+# echo "🚀 .zshrc loaded - Version 1.3 - Full beautiful FZF config with intelligent file previews"
+
+
+# All the default Sophia Techne aliases and functions
+# (don't mess with these directly, just overwrite them here!)
+source ~/.local/share/sophia-techne/default/zsh/rc
+
+export SOPHIA_TECHNE_PATH="$HOME/.local/share/sophia-techne"
+export PATH="$SOPHIA_TECHNE_PATH/bin:$PATH"
+
+# Cargo/Rust binaries
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Add your own exports, aliases, and functions here.
+#
+# Make an alias for invoking commands you use constantly
+# alias p='python'
+#
+# Use VSCode instead of neovim as your default editor
+# export EDITOR="code"
+#
+# Set a custom prompt with the directory revealed (alternatively use https://starship.rs)
+# PS1="\W \[\e]0;\w\a\]$PS1"
+
+# ===============================================
+# Modern CLI Tools
+# ===============================================
+
+# bat - better cat with syntax highlighting
+export BAT_THEME="Catppuccin Mocha"  # Matches your FZF theme colors
+alias cat='bat --paging=never'  # Use bat for cat (no paging for small files)
+alias bcat='bat'  # Full bat with paging and all features
+alias bathelp='bat --list-themes'  # List available themes
+
+# Note: eza aliases (ls, lt, etc.) are provided by Sophia Techne
+# Additional eza aliases:
+alias ll='eza -l --icons --group-directories-first --git'  # Long format with git status
+alias la='eza -la --icons --group-directories-first --git'  # All files including hidden
+alias l='eza -1 --icons'  # One file per line
+
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+  autoload -Uz compinit
+  compinit
+fi
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+# source /opt/homebrew/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+# source /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+# source $HOME/.oh-my-zsh/custom/plugins/zsh-z/zsh-z.plugin.zsh
+
+#if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+#  if [ "$TERMINAL_EMULATOR" = "JetBrains-JediTerm" ]; then
+#    eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/powerlevel10k_lean.omp.json)"
+#  else
+#    eval "$(oh-my-posh init zsh --config $HOME/.sim-web.omp.json)"
+#  fi
+#fi
+
+# bindkey '^I' menu-select
+# bindkey -M menuselect '^[OA' up-line-or-history
+# bindkey -M menuselect '^[OB' down-line-or-history
+# bindkey -M menuselect '^[OC' forward-char
+# bindkey -M menuselect '^[OD' backward-char
+# bindkey -M menuselect ' ' accept-line
+# bindkey -M menuselect '^[q' cancel
+# bindkey -M menuselect '^[b' backward-word
+# bindkey -M menuselect '^[f' forward-word
+
+# #bindkey -M menuselect '^I' menu-select
+# #zstyle ':completion:*' menu select=2
+# #zstyle ':completion:*' list-prompt '%S%M: %p%% %s'
+# #zstyle ':completion:*' menu select=2
+
+# if type brew &>/dev/null; then
+#   FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+
+#   autoload -Uz compinit
+#   compinit
+# fi
+
+# alias h='history'
+
+# # Set history size (in memory)
+# HISTSIZE=1000000
+
+# # Set history file size (on disk)
+# SAVEHIST=1000000
+
+# # History file location (optional - defaults to ~/.zsh_history)
+# HISTFILE=~/.zsh_history
+
+# # Append to history file immediately, don't wait for shell exit
+# setopt INC_APPEND_HISTORY
+
+# # Share history between all zsh sessions
+# setopt SHARE_HISTORY
+
+# # Don't save duplicate entries
+# setopt HIST_IGNORE_DUPS
+
+# # Don't save commands that start with a space
+# setopt HIST_IGNORE_SPACE
+
+# # Remove older duplicate entries when trimming history
+# setopt HIST_EXPIRE_DUPS_FIRST
+
+# # Don't display duplicates when searching history
+# setopt HIST_FIND_NO_DUPS
+
+# # Remove extra whitespace from commands before saving
+# setopt HIST_REDUCE_BLANKS
+
+# # Enable incremental search
+# #bindkey '^R' history-incremental-search-backward
+# #bindkey '^S' history-incremental-search-forward
+
+# #source .zsh_history_manager.zsh
+
+# eval $(thefuck --alias) 
+# export PATH="$HOME/.local/bin:$PATH"
+
+# alias vim=nvim
+# alias vi=nvim
+
+
+#[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+fd() {
+  git diff $@ --name-only | fzf -m --ansi --preview="git diff $@ --color=always -- {-1}"
+}
+export PATH="/Users/nadilson.ferreira/git-fuzzy/bin:$PATH"
+
+# ===============================================
+# Custom FZF Functions
+# ===============================================
+
+# Enhanced file finder with cd capability
+fcd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
+}
+
+# Git branch switcher
+fgb() {
+  local branches branch
+  branches=$(git branch -vv) &&
+  branch=$(echo "$branches" | fzf +m) &&
+  git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
+}
+
+# Process killer
+fkill() {
+  local pid
+  if [ "$UID" != "0" ]; then
+    pid=$(ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
+  else
+    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+  fi
+
+  if [ "x$pid" != "x" ]; then
+    echo $pid | xargs kill -${1:-9}
+  fi
+}
+
+# ===============================================
+# Additional ZSH Configuration (Optional)
+# ===============================================
+
+# History settings
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+
+# Basic ZSH options
+setopt AUTO_CD
+setopt CORRECT
+setopt CORRECT_ALL
+setopt NO_CASE_GLOB
+setopt NUMERIC_GLOB_SORT
+setopt EXTENDED_GLOB
+
+# Completion system
+autoload -Uz compinit
+compinit
+
+# Enable case-insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+# Colorful completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# Menu-style completion
+zstyle ':completion:*' menu select
+
+# ===============================================
+# Aliases (Optional but useful)
+# ===============================================
+
+# Better grep
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# Safety nets
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Quick navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias c='clear'
+
+# Git shortcuts
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline'
+
+# Music download shortcuts
+alias dl-music='yt-dlp'
+alias dl-song='yt-dlp --no-playlist'
+alias dl-playlist='yt-dlp --yes-playlist'
+
+
+# Music management functions
+dlm() {
+  # Download music and auto-organize with beets
+  yt-dlp "$@" && mpc rescan --wait && echo "✅ Music added! Updated MPD library."
+}
+
+dls() {
+  # Download single song (no playlist)
+  yt-dlp --no-playlist "$@" && mpc rescan --wait && echo "✅ Song added!"
+}
+
+dlp() {
+  # Download playlist
+  yt-dlp --yes-playlist "$@" && mpc rescan --wait && echo "✅ Playlist added!"
+}
+
+# Set all FZF environment variables
+export FZF_DEFAULT_OPTS="
+  --height=80%
+  --layout=reverse-list
+  --border=bold
+  --border-label-pos=3
+  --margin=1,2
+  --padding=1,2
+  --info=inline-right
+  --prompt='❯ '
+  --pointer='▶'
+  --marker='✅'
+  --separator='─'
+  --scrollbar='▌▐'
+  --ellipsis='…'
+  --tabstop=2
+  --bind='alt-k:up,alt-j:down'
+  --bind='ctrl-u:half-page-up'
+  --bind='ctrl-d:half-page-down'
+  --bind='ctrl-f:page-down'
+  --bind='ctrl-b:page-up'
+  --bind='ctrl-g:top'
+  --bind='ctrl-h:backward-char'
+  --bind='ctrl-l:forward-char'
+  --bind='alt-left:backward-word,alt-right:forward-word'
+  --bind='ctrl-w:backward-kill-word'
+  --bind='alt-bs:backward-kill-word'
+  --bind='ctrl-y:yank'
+  --bind='ctrl-/:change-preview-window(down,border-top|hidden|)'
+  --bind='alt-/:change-preview-window(right,border-left|hidden|)'
+  --bind='alt-up:preview-page-up,alt-down:preview-page-down'
+  --bind='ctrl-s:toggle-sort'
+  --bind='ctrl-t:toggle-all'
+  --bind='alt-enter:print-query'
+  --bind='ctrl-alt-l:clear-query'
+  --preview-window='right:50%:wrap:border-left'
+  --color='fg:#CDD6F4,bg:#1E1E2E,hl:#F38BA8'
+  --color='fg+:#CDD6F4,bg+:#313244,hl+:#F9E2AF'
+  --color='info:#CBA6F7,prompt:#CBA6F7,pointer:#F9E2AF'
+  --color='marker:#A6E3A1,spinner:#F9E2AF,header:#94E2D5'
+  --color='gutter:#1E1E2E,selected-bg:#313244,selected-fg:#CDD6F4'
+  --color='disabled:#6C7086,preview-bg:#181825,preview-fg:#CDD6F4'
+  --color='border:#89B4FA,preview-border:#89B4FA,query:#94E2D5:regular'
+"
+
+export FZF_CTRL_T_OPTS="
+  --border-label=' 📁 Files '
+  --preview='
+    if [[ -f {} ]]; then
+      file_type=\$(file --mime-type -b {})
+      case \$file_type in
+        text/*|application/json|application/xml|application/javascript)
+          if command -v bat > /dev/null 2>&1; then
+            bat --color=always --style=header,grid --line-range :300 {}
+          elif command -v highlight > /dev/null 2>&1; then
+            highlight -O ansi --force {}
+          else
+            cat {} | head -300
+          fi
+          ;;
+        image/*)
+          if command -v chafa > /dev/null 2>&1; then
+            chafa --fill=block --symbols=block -c 256 -s 80x24 {}
+          elif command -v catimg > /dev/null 2>&1; then
+            catimg -w 80 {}
+          else
+            echo \"🖼️  Image file: {}\"
+            file {}
+          fi
+          ;;
+        application/pdf)
+          if command -v pdftotext > /dev/null 2>&1; then
+            pdftotext {} - | head -100
+          else
+            echo \"📄 PDF file: {}\"
+            file {}
+          fi
+          ;;
+        *)
+          echo \"📎 Binary file: {}\"
+          file {}
+          ls -la {}
+          ;;
+      esac
+    elif [[ -d {} ]]; then
+      if command -v eza > /dev/null 2>&1; then
+        eza --tree --level=2 --color=always --icons {}
+      elif command -v tree > /dev/null 2>&1; then
+        tree -C -L 2 {}
+      else
+        ls -la --color=always {}
+      fi
+    else
+      echo \"Unknown file type: {}\"
+      file {}
+    fi
+  '
+  --bind='enter:become(echo {})'
+  --bind='ctrl-e:execute(echo {+} | xargs -o \$EDITOR)'
+  --bind='ctrl-o:execute(open {+})'
+  --bind='alt-e:execute(echo {+} | xargs -I {} sh -c \"cd \$(dirname {}) && \$EDITOR \$(basename {})\")'
+  --header='ENTER: select, CTRL-E: edit, CTRL-O: open, CTRL-/: toggle preview'
+"
+
+export FZF_CTRL_R_OPTS="
+  --border-label=' 📜 History '
+  --preview='bash ~/.fzf-history-preview.sh {}'
+  --preview-window='right:50%:wrap:border-left'
+  
+  # Preview controls
+  --bind='ctrl-p:change-preview-window(right:50%:wrap:border-left|hidden|)'
+  --bind='alt-/:change-preview-window(down:50%:wrap:border-top|right:50%:wrap:border-left|hidden|)'
+  --bind='alt-up:preview-page-up'
+  --bind='alt-down:preview-page-down'
+  --bind='shift-up:preview-up'
+  --bind='shift-down:preview-down'
+  
+  # Execution controls
+  --bind='ctrl-e:execute-silent(echo {+} > /tmp/fzf-command && kill -USR1 \$\$)'
+  --bind='ctrl-x:execute(echo {} | sed \"s/^[ ]*[0-9]*[ ]*//\" | sh)'
+  --bind='alt-enter:print-query'
+  --bind='ctrl-y:execute-silent(echo {} | sed \"s/^[ ]*[0-9]*[ ]*//\" | pbcopy)'
+  
+  # Navigation and selection
+  --bind='ctrl-a:select-all'
+  --bind='ctrl-d:deselect-all'
+  --bind='ctrl-t:toggle-all'
+  --bind='tab:toggle+down'
+  --bind='shift-tab:toggle+up'
+  --bind='ctrl-g:top'
+  --bind='end:last'
+  
+  # Search and filtering
+  --bind='ctrl-/:toggle-sort'
+  --bind='ctrl-s:toggle-sort'
+  --bind='alt-c:clear-query'
+  
+  # Quick command filters (using change-query)
+  --bind='f1:change-query(cat )'
+  --bind='f2:change-query(vim )'
+  --bind='f3:change-query(git )'
+  --bind='f4:change-query(docker )'
+  --bind='f5:change-query(ls )'
+  --bind='f6:change-query(grep )'
+  --bind='f7:change-query(find )'
+  --bind='f8:change-query(cd )'
+  
+  # Alternative navigation
+  --bind='ctrl-j:down'
+  --bind='ctrl-k:up'
+  --bind='ctrl-n:down'
+  --bind='ctrl-u:up'
+  
+  # Window layout controls  
+  --bind='alt-h:change-preview-window(left:50%:wrap:border-right|hidden|)'
+  --bind='alt-j:change-preview-window(down:50%:wrap:border-top|hidden|)'
+  --bind='alt-k:change-preview-window(up:50%:wrap:border-bottom|hidden|)'
+  --bind='alt-l:change-preview-window(right:50%:wrap:border-left|hidden|)'
+  
+  # Quick clear and toggle
+  --bind='esc:clear-query'
+  --bind='?:toggle-preview'
+  
+  --header='⚡ ENTER: execute | CTRL-Y: copy | CTRL-X: run | CTRL-P: preview | F1-F8: filters'
+  --query=''
+  --prompt='hist❯ '
+"
+
+export FZF_ALT_C_OPTS="
+  --border-label=' 📂 Directories '
+  --preview='
+    if command -v eza > /dev/null 2>&1; then
+      eza --tree --level=2 --color=always --icons {}
+    elif command -v tree > /dev/null 2>&1; then
+      tree -C -L 2 {}
+    else
+      ls -la --color=always {}
+    fi
+  '
+  --bind='enter:become(echo {})'
+  --header='ENTER: cd to directory'
+"
+
+export FZF_COMPLETION_OPTS="
+  --border-label=' 🔧 Completion '
+  --info=inline
+  --layout=reverse
+  --border=rounded
+"
+
+export FZF_TMUX_OPTS="-p80%,60%"
+
+
+CORRECT_IGNORE='(_*|*/_*)'
+
+# ===============================================
+# Environment Variables
+# ===============================================
+# Fix terminal width detection for beets and other tools
+export COLUMNS=120
+
+# ===============================================
+# MPD Auto-Start
+# ===============================================
+# Start MPD if not already running
+if command -v mpd &> /dev/null && ! pgrep -x mpd > /dev/null 2>&1; then
+  mpd ~/.config/mpd/mpd.conf 2>/dev/null
+fi
+

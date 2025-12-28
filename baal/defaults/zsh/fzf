@@ -1,0 +1,179 @@
+# ===============================================
+# Baal - FZF Configuration
+# ===============================================
+
+# Load FZF key bindings and completion (Arch Linux paths)
+if [ -f /usr/share/fzf/key-bindings.zsh ]; then
+    source /usr/share/fzf/key-bindings.zsh
+fi
+
+if [ -f /usr/share/fzf/completion.zsh ]; then
+    source /usr/share/fzf/completion.zsh
+fi
+
+# FZF Default Options - Catppuccin Mocha Theme
+export FZF_DEFAULT_OPTS="
+  --height=80%
+  --layout=reverse-list
+  --border=bold
+  --border-label-pos=3
+  --margin=1,2
+  --padding=1,2
+  --info=inline-right
+  --prompt='❯ '
+  --pointer='▶'
+  --marker='✅'
+  --separator='─'
+  --scrollbar='▌▐'
+  --ellipsis='…'
+  --tabstop=2
+  --bind='alt-k:up,alt-j:down'
+  --bind='ctrl-u:half-page-up'
+  --bind='ctrl-d:half-page-down'
+  --bind='ctrl-f:page-down'
+  --bind='ctrl-b:page-up'
+  --bind='ctrl-g:top'
+  --bind='ctrl-h:backward-char'
+  --bind='ctrl-l:forward-char'
+  --bind='alt-left:backward-word,alt-right:forward-word'
+  --bind='ctrl-w:backward-kill-word'
+  --bind='alt-bs:backward-kill-word'
+  --bind='ctrl-y:yank'
+  --bind='ctrl-/:change-preview-window(down,border-top|hidden|)'
+  --bind='alt-/:change-preview-window(right,border-left|hidden|)'
+  --bind='alt-up:preview-page-up,alt-down:preview-page-down'
+  --bind='ctrl-s:toggle-sort'
+  --bind='ctrl-t:toggle-all'
+  --bind='alt-enter:print-query'
+  --bind='ctrl-alt-l:clear-query'
+  --preview-window='right:50%:wrap:border-left'
+  --color='fg:#CDD6F4,bg:#1E1E2E,hl:#F38BA8'
+  --color='fg+:#CDD6F4,bg+:#313244,hl+:#F9E2AF'
+  --color='info:#CBA6F7,prompt:#CBA6F7,pointer:#F9E2AF'
+  --color='marker:#A6E3A1,spinner:#F9E2AF,header:#94E2D5'
+  --color='gutter:#1E1E2E,selected-bg:#313244,selected-fg:#CDD6F4'
+  --color='disabled:#6C7086,preview-bg:#181825,preview-fg:#CDD6F4'
+  --color='border:#89B4FA,preview-border:#89B4FA,query:#94E2D5:regular'
+"
+
+# FZF File Preview (Ctrl+T)
+export FZF_CTRL_T_OPTS="
+  --border-label=' 📁 Files '
+  --preview='
+    if [[ -f {} ]]; then
+      file_type=\$(file --mime-type -b {})
+      case \$file_type in
+        text/*|application/json|application/xml|application/javascript)
+          if command -v bat > /dev/null 2>&1; then
+            bat --color=always --style=header,grid --line-range :300 {}
+          elif command -v highlight > /dev/null 2>&1; then
+            highlight -O ansi --force {}
+          else
+            cat {} | head -300
+          fi
+          ;;
+        image/*)
+          if command -v chafa > /dev/null 2>&1; then
+            chafa --fill=block --symbols=block -c 256 -s 80x24 {}
+          elif command -v catimg > /dev/null 2>&1; then
+            catimg -w 80 {}
+          else
+            echo \"🖼️  Image file: {}\"
+            file {}
+          fi
+          ;;
+        application/pdf)
+          if command -v pdftotext > /dev/null 2>&1; then
+            pdftotext {} - | head -100
+          else
+            echo \"📄 PDF file: {}\"
+            file {}
+          fi
+          ;;
+        *)
+          echo \"📎 Binary file: {}\"
+          file {}
+          ls -la {}
+          ;;
+      esac
+    elif [[ -d {} ]]; then
+      if command -v eza > /dev/null 2>&1; then
+        eza --tree --level=2 --color=always --icons {}
+      elif command -v tree > /dev/null 2>&1; then
+        tree -C -L 2 {}
+      else
+        ls -la --color=always {}
+      fi
+    else
+      echo \"Unknown file type: {}\"
+      file {}
+    fi
+  '
+  --bind='enter:become(echo {})'
+  --bind='ctrl-e:execute(echo {+} | xargs -o \$EDITOR)'
+  --bind='ctrl-o:execute(xdg-open {+})'
+  --bind='alt-e:execute(echo {+} | xargs -I {} sh -c \"cd \$(dirname {}) && \$EDITOR \$(basename {})\")'
+  --header='ENTER: select, CTRL-E: edit, CTRL-O: open, CTRL-/: toggle preview'
+"
+
+# FZF History (Ctrl+R)
+export FZF_CTRL_R_OPTS="
+  --border-label=' 📜 History '
+  --preview='echo {}'
+  --preview-window='right:50%:wrap:border-left'
+  --bind='ctrl-p:change-preview-window(right:50%:wrap:border-left|hidden|)'
+  --bind='alt-/:change-preview-window(down:50%:wrap:border-top|right:50%:wrap:border-left|hidden|)'
+  --bind='alt-up:preview-page-up'
+  --bind='alt-down:preview-page-down'
+  --bind='shift-up:preview-up'
+  --bind='shift-down:preview-down'
+  --bind='ctrl-y:execute-silent(echo {} | sed \"s/^[ ]*[0-9]*[ ]*//\" | wl-copy)'
+  --bind='ctrl-a:select-all'
+  --bind='ctrl-d:deselect-all'
+  --bind='ctrl-t:toggle-all'
+  --bind='tab:toggle+down'
+  --bind='shift-tab:toggle+up'
+  --bind='ctrl-g:top'
+  --bind='end:last'
+  --bind='ctrl-/:toggle-sort'
+  --bind='ctrl-s:toggle-sort'
+  --bind='alt-c:clear-query'
+  --bind='f1:change-query(cat )'
+  --bind='f2:change-query(vim )'
+  --bind='f3:change-query(git )'
+  --bind='f4:change-query(docker )'
+  --bind='f5:change-query(ls )'
+  --bind='f6:change-query(grep )'
+  --bind='f7:change-query(find )'
+  --bind='f8:change-query(cd )'
+  --bind='esc:clear-query'
+  --bind='?:toggle-preview'
+  --header='⚡ ENTER: execute | CTRL-Y: copy | F1-F8: filters'
+  --query=''
+  --prompt='hist❯ '
+"
+
+# FZF Directory Navigation (Alt+C)
+export FZF_ALT_C_OPTS="
+  --border-label=' 📂 Directories '
+  --preview='
+    if command -v eza > /dev/null 2>&1; then
+      eza --tree --level=2 --color=always --icons {}
+    elif command -v tree > /dev/null 2>&1; then
+      tree -C -L 2 {}
+    else
+      ls -la --color=always {}
+    fi
+  '
+  --bind='enter:become(echo {})'
+  --header='ENTER: cd to directory'
+"
+
+export FZF_COMPLETION_OPTS="
+  --border-label=' 🔧 Completion '
+  --info=inline
+  --layout=reverse
+  --border=rounded
+"
+
+export FZF_TMUX_OPTS="-p80%,60%"

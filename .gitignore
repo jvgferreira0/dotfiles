@@ -1,0 +1,36 @@
+# Browser data (should not be version controlled)
+1Password/
+BraveSoftware/
+google-chrome*/
+microsoft-edge*/
+chromium/
+
+# System/Application state
+dconf/
+pulse/
+fcitx/
+fcitx5/
+gtk-3.0/
+gtk-4.0/
+ibus/
+
+# Application caches and runtime data
+*/cache/
+*/Cache/
+*/.cache/
+
+# IDE/Editor specific
+.claude/
+**/.claude/
+
+# OS specific
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Application-specific exclusions
+spotify/
+qalculate/
+nautilus/
+spicetify/

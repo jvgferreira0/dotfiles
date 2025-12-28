@@ -1,0 +1,9 @@
+# ===============================================
+# Kanagawa Wave Theme - ZSH Customizations
+# ===============================================
+
+# This file is sourced after default ZSH config
+# Add any theme-specific ZSH customizations here
+
+# Example: Custom prompt colors (if not using Starship)
+# PROMPT='%F{#7E9CD8}%~%f %F{#76946A}❯%f '

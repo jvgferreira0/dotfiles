@@ -1,0 +1,30 @@
+# ===============================================
+# Baal Framework - Main ZSH Configuration
+# ===============================================
+
+# Set Baal home if not already set
+export BAAL_HOME="${BAAL_HOME:-$HOME/.config/baal}"
+
+# Load helper functions
+if [ -f "$BAAL_HOME/lib/helpers.sh" ]; then
+    source "$BAAL_HOME/lib/helpers.sh"
+fi
+
+# Load ZSH modules
+baal_load "zsh/options"
+baal_load "zsh/history"
+baal_load "zsh/completion"
+baal_load "zsh/keybindings"
+baal_load "zsh/aliases"
+baal_load "zsh/functions"
+baal_load "zsh/fzf"
+baal_load "zsh/plugins"
+baal_load "zsh/prompt"
+
+# Load current theme if exists
+if [ -L "$BAAL_HOME/current-theme" ]; then
+    BAAL_THEME_RC="$BAAL_HOME/current-theme/zshrc"
+    BAAL_THEME_FZF="$BAAL_HOME/current-theme/fzf.zsh"
+    baal_source "$BAAL_THEME_RC"
+    baal_source "$BAAL_THEME_FZF"
+fi

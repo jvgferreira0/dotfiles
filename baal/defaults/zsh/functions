@@ -1,0 +1,69 @@
+# ===============================================
+# Baal - ZSH Custom Functions
+# ===============================================
+
+# Enhanced directory finder with cd
+fcd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
+}
+
+# Git branch switcher
+fgb() {
+  local branches branch
+  branches=$(git branch -vv) &&
+  branch=$(echo "$branches" | fzf +m) &&
+  git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
+}
+
+# Process killer
+fkill() {
+  local pid
+  if [ "$UID" != "0" ]; then
+    pid=$(ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
+  else
+    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+  fi
+
+  if [ "x$pid" != "x" ]; then
+    echo $pid | xargs kill -${1:-9}
+  fi
+}
+
+# Git diff with FZF
+fd() {
+  git diff $@ --name-only | fzf -m --ansi --preview="git diff $@ --color=always -- {-1}"
+}
+
+# Music management functions with MPD integration
+dlm() {
+  # Download music and auto-rescan MPD
+  yt-dlp "$@" && mpc rescan --wait && echo "✅ Music added! Updated MPD library."
+}
+
+dls() {
+  # Download single song (no playlist)
+  yt-dlp --no-playlist "$@" && mpc rescan --wait && echo "✅ Song added!"
+}
+
+dlp() {
+  # Download playlist
+  yt-dlp --yes-playlist "$@" && mpc rescan --wait && echo "✅ Playlist added!"
+}
+
+# Zoxide integration
+if command -v zoxide &> /dev/null; then
+    eval "$(zoxide init zsh)"
+    alias cd='z'
+fi
+
+# Mise integration
+if command -v mise &> /dev/null; then
+    eval "$(mise activate zsh)"
+fi
+
+# MPD Auto-Start
+if command -v mpd &> /dev/null && ! pgrep -x mpd > /dev/null 2>&1; then
+  mpd ~/.config/mpd/mpd.conf 2>/dev/null
+fi

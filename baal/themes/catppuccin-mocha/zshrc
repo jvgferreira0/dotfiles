@@ -1,0 +1,9 @@
+# ===============================================
+# Catppuccin Mocha Theme - ZSH Customizations
+# ===============================================
+
+# This file is sourced after default ZSH config
+# Add any theme-specific ZSH customizations here
+
+# Example: Custom prompt colors (if not using Starship)
+# PROMPT='%F{#89B4FA}%~%f %F{#A6E3A1}❯%f '

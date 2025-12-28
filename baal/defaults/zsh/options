@@ -1,0 +1,18 @@
+# ===============================================
+# Baal - ZSH Options
+# ===============================================
+
+# Shell behavior
+setopt INTERACTIVE_COMMENTS   # Allow comments in interactive shell
+setopt AUTO_CD                # cd by typing directory name
+setopt CORRECT                # Command correction
+setopt CORRECT_ALL            # Correct all arguments
+setopt NO_CASE_GLOB          # Case insensitive globbing
+setopt NUMERIC_GLOB_SORT     # Sort numerically when possible
+setopt EXTENDED_GLOB         # Extended globbing
+
+# Characters considered part of a word
+WORDCHARS='*?_[]~=&;!#$%^(){}<>'
+
+# Ignore patterns for correction
+CORRECT_IGNORE='(_*|*/_*)'

@@ -1,0 +1,22 @@
+# ===============================================
+# Baal - ZSH Keybindings
+# ===============================================
+
+# Custom history navigation (cursor at end)
+up-history-end-of-line() {
+    zle up-line-or-history
+    zle end-of-line
+}
+
+down-history-end-of-line() {
+    zle down-line-or-history
+    zle end-of-line
+}
+
+# Register the functions as ZLE widgets
+zle -N up-history-end-of-line
+zle -N down-history-end-of-line
+
+# Bind to arrow keys
+bindkey '^[[A' up-history-end-of-line    # Up arrow
+bindkey '^[[B' down-history-end-of-line  # Down arrow

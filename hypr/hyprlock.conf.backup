@@ -1,0 +1,228 @@
+# ============================================
+# Hyprlock Configuration
+# Style inspired by: https://github.com/MrVivekRajan/Hyprlock-Styles/tree/main/Style-5
+# ============================================
+
+# Source theme colors from Omarchy (will be replaced when de-Omarchy'd)
+source = ~/.config/omarchy/current/theme/hyprlock.conf
+
+# ============================================
+# General Settings
+# ============================================
+general {
+    # Don't treat empty password field as an unlock attempt
+    ignore_empty_input = true
+
+    # Grace period (in seconds) before requiring password after locking
+    grace = 0
+
+    # Hide the cursor after inactivity
+    hide_cursor = true
+
+    # Immediately hide cursor on lock
+    immediate_render = true
+}
+
+# ============================================
+# Background Configuration
+# ============================================
+background {
+    # Apply to all monitors (empty = all)
+    monitor =
+
+    # Background color (fallback if image fails to load)
+    color = $color
+
+    # Path to wallpaper image
+    path = /home/jferreira/Wallpapers/a_screenshot_of_a_video_game.png
+
+    # Blur settings for background image
+    # Higher passes = more blur (performance impact)
+    blur_passes = 3
+    blur_size = 7
+}
+
+# ============================================
+# Animation Settings
+# ============================================
+# Enables fade-in effects for widgets
+animations {
+    enabled = true
+}
+
+# ============================================
+# Clock Widget (Large Time Display)
+# ============================================
+# Displays current time in large text at top center
+# Using 24-hour format (HH:MM)
+label {
+    monitor =
+    # Update every 1000ms (1 second) to show live time
+    # %H = 24-hour format (00-23), %M = minutes
+    text = cmd[update:1000] echo "$(date '+%H:%M')"
+    color = rgba(216, 222, 233, 0.70)
+    font_size = 140
+    font_family = SF Pro Display Bold 
+
+    # Position: horizontal center, 260px from center vertically
+    position = 0, 260
+    halign = center
+    valign = center
+}
+
+# ============================================
+# Date Widget
+# ============================================
+# Displays full date below the clock
+# Format: "Monday, 29 July"
+label {
+    monitor =
+    # %A = full weekday name, %d = day of month, %B = full month name
+    text = cmd[update:1000] echo "$(date '+%A, %d %B')"
+    color = rgba(216, 222, 233, 0.70)
+    font_size = 30
+    font_family = SF Pro Display 
+
+    # Position: below the clock
+    position = 0, 150
+    halign = center
+    valign = center
+}
+
+# ============================================
+# Profile Picture
+# ============================================
+# Displays user profile image in circular frame
+image {
+    monitor =
+    path = ~/.config/hypr/gorbachev.jpeg
+
+    # Size of the profile picture
+    size = 160
+
+    # Rounding: -1 makes it a perfect circle
+    rounding = -1
+
+    # Border around the profile picture
+    border_size = 4
+    border_color = $outer_color
+
+    # Position: center horizontally, 40px above center
+    position = 0, 40
+    halign = center
+    valign = center
+
+}
+
+# ============================================
+# Greeting Label
+# ============================================
+# Displays personalized greeting below profile picture
+label {
+    monitor =
+    # Shows "Hello, username"
+    text = Hello, $USER
+    color = $font_color
+    font_size = 28
+    font_family = JetBrainsMono Nerd Font
+
+    # Position: below profile picture
+    position = 0, -100
+    halign = center
+    valign = center
+
+    shadow_passes = 2
+    shadow_size = 3
+}
+
+# ============================================
+# Password Input Field
+# ============================================
+input-field {
+    monitor =
+
+    # Size: width x height
+    size = 300, 60
+
+    # Position: below greeting
+    position = 0, -180
+    halign = center
+    valign = center
+
+    # Colors
+    inner_color = $inner_color
+    outer_color = $outer_color
+    outline_thickness = 3
+
+    # Font settings
+    font_family = JetBrainsMono Nerd Font
+    font_color = $font_color
+    font_size = 16
+
+    # Placeholder text when field is empty
+    placeholder_text = <span foreground="##d8dee9">Enter Password</span>
+
+    # Color when checking password
+    check_color = $check_color
+
+    # Text shown when password fails
+    # $FAIL = reason, $ATTEMPTS = number of attempts
+    fail_text = <span foreground="##bf616a"><i>$FAIL ($ATTEMPTS)</i></span>
+
+    # Failed password text color
+    fail_color = rgba(191, 97, 106, 1.0)
+
+    # Capslock warning
+    capslock_color = rgba(235, 203, 139, 1.0)
+
+    # Visual settings
+    rounding = 12
+    shadow_passes = 3
+    shadow_size = 4
+    shadow_color = rgba(0, 0, 0, 0.4)
+
+    # Don't fade out text when field is empty
+    fade_on_empty = false
+
+    # Timeout before clearing failed attempt text (ms)
+    fail_timeout = 2000
+
+    # Show dots instead of actual password characters
+    hide_input = false
+
+    # Number of dots to show while typing
+    dots_spacing = 0.3
+    dots_center = true
+}
+
+# ============================================
+# Fingerprint Authentication Label
+# ============================================
+# Shows fingerprint icon/text when fingerprint is available
+label {
+    monitor =
+    text = Use Me
+    color = $font_color
+    font_size = 16
+    font_family = JetBrainsMono Nerd Font
+
+    # Position: below password field
+    position = 0, -260
+    halign = center
+    valign = center
+
+    shadow_passes = 2
+    shadow_size = 3
+}
+
+# ============================================
+# Authentication Methods
+# ============================================
+auth {
+    # Enable fingerprint authentication
+    fingerprint:enabled = true
+
+    # Timeout for fingerprint (ms)
+    fingerprint:ready_timeout = 2000
+    fingerprint:present_timeout = 5000
+}

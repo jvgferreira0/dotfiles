@@ -1,0 +1,59 @@
+# ===============================================
+# Kanagawa Dragon Theme - Alacritty Colors
+# ===============================================
+
+[colors.primary]
+background = "#181616"
+foreground = "#c5c9c5"
+dim_foreground = "#a6a69c"
+bright_foreground = "#c5c9c5"
+
+[colors.cursor]
+text = "#181616"
+cursor = "#c5c9c5"
+
+[colors.vi_mode_cursor]
+text = "#181616"
+cursor = "#8ba4b0"
+
+[colors.search.matches]
+foreground = "#181616"
+background = "#c4b28a"
+
+[colors.search.focused_match]
+foreground = "#181616"
+background = "#8a9a7b"
+
+[colors.selection]
+text = "#181616"
+background = "#c4b28a"
+
+[colors.normal]
+black = "#0d0c0c"
+red = "#c4746e"
+green = "#8a9a7b"
+yellow = "#c4b28a"
+blue = "#8ba4b0"
+magenta = "#a292a3"
+cyan = "#8ea4a2"
+white = "#C8C093"
+
+[colors.bright]
+black = "#a6a69c"
+red = "#E46876"
+green = "#87a987"
+yellow = "#e6c384"
+blue = "#7fb4ca"
+magenta = "#938aa9"
+cyan = "#7aa89f"
+white = "#c5c9c5"
+
+[colors.dim]
+black = "#0d0c0c"
+red = "#c4746e"
+green = "#8a9a7b"
+yellow = "#c4b28a"
+blue = "#8ba4b0"
+magenta = "#a292a3"
+cyan = "#8ea4a2"
+white = "#a6a69c"

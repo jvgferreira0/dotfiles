@@ -1,0 +1,12 @@
+# ===============================================
+# Baal - ZSH Prompt
+# ===============================================
+
+# Use starship prompt if available
+if command -v starship &> /dev/null; then
+    eval "$(starship init zsh)"
+else
+    # Simple colored prompt (fallback)
+    autoload -Uz colors && colors
+    PROMPT='%F{blue}%~%f %F{green}❯%f '
+fi

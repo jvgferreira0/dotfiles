@@ -1,0 +1,10 @@
+# ===============================================
+# Baal-managed Alacritty Configuration
+# ===============================================
+
+# Import Baal theme colors and base configuration
+[general]
+import = [
+    "~/.config/baal/current-theme/alacritty.toml",
+    "~/.config/baal/defaults/alacritty/base.toml"
+]

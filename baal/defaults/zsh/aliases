@@ -1,0 +1,65 @@
+# ===============================================
+# Baal - ZSH Aliases
+# ===============================================
+
+# Modern CLI Tools
+export BAT_THEME="Catppuccin Mocha"
+alias cat='bat --paging=never'
+alias bcat='bat'
+alias bathelp='bat --list-themes'
+
+# eza - better ls
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -l --icons --group-directories-first --git'
+alias la='eza -la --icons --group-directories-first --git'
+alias lt='eza --tree --level=2 --icons'
+alias l='eza -1 --icons'
+
+# grep with colors
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# Safety nets
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Quick navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias c='clear'
+
+# Git shortcuts
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+
+# Git SSH Key Management
+# Uncomment and customize for your SSH keys:
+# alias gh-my='ssh-add -D ~/.ssh/id_rsa'
+# alias gh-work='ssh-add -D ~/.ssh/id_ed25519_work'
+
+# Music downloads (yt-dlp)
+alias dl-music='yt-dlp'
+alias dl-song='yt-dlp --no-playlist'
+alias dl-playlist='yt-dlp --yes-playlist'
+
+# Editor
+alias vim='nvim'
+alias vi='nvim'
+
+# Clipboard (Wayland)
+alias pbcopy='wl-copy'
+alias pbpaste='wl-paste'
+
+# Environment variables
+export EDITOR="nvim"
+export VISUAL="nvim"
+export COLUMNS=120

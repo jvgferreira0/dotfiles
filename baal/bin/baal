@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+# ===============================================
+# Baal - Main CLI Utility
+# ===============================================
+
+set -e
+
+# Set Baal home
+export BAAL_HOME="${BAAL_HOME:-$HOME/.config/baal}"
+
+# Load helpers
+source "$BAAL_HOME/lib/helpers.sh"
+
+# Show usage
+usage() {
+    cat << EOF
+Baal - Dotfiles Framework
+
+Usage: baal <command> [options]
+
+Commands:
+    install         Install Baal and link configurations
+    update          Update Baal framework
+    theme [name]    Switch theme or show current theme
+    list-themes     List available themes
+    status          Show current Baal configuration
+    help            Show this help message
+
+Examples:
+    baal install
+    baal theme nord
+    baal list-themes
+    baal status
+
+EOF
+}
+
+# Install command
+cmd_install() {
+    baal_log "Installing Baal framework..."
+
+    # Link ZSH config
+    if [ ! -f "$HOME/.zshrc" ] || [ -L "$HOME/.zshrc" ]; then
+        baal_link "$BAAL_HOME/defaults/zsh/rc" "$HOME/.zshrc"
+    else
+        baal_warn "~/.zshrc already exists (not a symlink)"
+        baal_info "Backup and link manually, or run: mv ~/.zshrc ~/.zshrc.backup"
+    fi
+
+    # Link Alacritty config if it doesn't exist
+    mkdir -p "$HOME/.config/alacritty"
+    if [ ! -f "$HOME/.config/alacritty/alacritty.toml" ]; then
+        # We'll create a master config that imports theme
+        cat > "$HOME/.config/alacritty/alacritty.toml" << 'EOCONF'
+# Baal-managed Alacritty configuration
+import = ["~/.config/baal/current-theme/alacritty.toml", "~/.config/baal/defaults/alacritty/base.toml"]
+EOCONF
+        baal_success "Created Alacritty config with theme support"
+    fi
+
+    baal_success "Baal installation complete!"
+    baal_info "Restart your terminal or run: source ~/.zshrc"
+}
+
+# Theme command
+cmd_theme() {
+    if [ -z "$1" ]; then
+        current=$(baal_get_theme)
+        baal_info "Current theme: $current"
+    else
+        baal_set_theme "$1"
+    fi
+}
+
+# List themes command
+cmd_list_themes() {
+    baal_log "Available themes:"
+    for theme in "$BAAL_THEMES_DIR"/*; do
+        if [ -d "$theme" ]; then
+            theme_name=$(basename "$theme")
+            if [ "$theme_name" = "$(baal_get_theme)" ]; then
+                echo "  * $theme_name (active)"
+            else
+                echo "    $theme_name"
+            fi
+        fi
+    done
+}
+
+# Status command
+cmd_status() {
+    baal_log "Baal Framework Status"
+    echo ""
+    echo "  Home:    $BAAL_HOME"
+    echo "  Theme:   $(baal_get_theme)"
+    echo "  ZSH RC:  $(readlink -f ~/.zshrc 2>/dev/null || echo 'not linked')"
+    echo ""
+}
+
+# Update command
+cmd_update() {
+    baal_log "Updating Baal framework..."
+    cd "$BAAL_HOME"
+    if [ -d ".git" ]; then
+        git pull
+        baal_success "Baal updated successfully!"
+    else
+        baal_error "Not a git repository"
+    fi
+}
+
+# Main command router
+case "${1:-help}" in
+    install)
+        cmd_install
+        ;;
+    update)
+        cmd_update
+        ;;
+    theme)
+        cmd_theme "$2"
+        ;;
+    list-themes|themes)
+        cmd_list_themes
+        ;;
+    status)
+        cmd_status
+        ;;
+    help|--help|-h)
+        usage
+        ;;
+    *)
+        baal_error "Unknown command: $1"
+        usage
+        exit 1
+        ;;
+esac

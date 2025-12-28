@@ -1,0 +1,3 @@
+
+# Homebrew (macOS only - disabled on Linux)
+# eval "$(/opt/homebrew/bin/brew shellenv)"

@@ -1,0 +1,1 @@
+/home/jferreira/.config/omarchy/current/theme/neovim.lua

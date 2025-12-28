@@ -1,0 +1,258 @@
+# ===============================================
+# Alacritty Terminal Configuration - Arch Linux
+# Enhanced configuration combining best features
+# ===============================================
+
+# Theme Integration
+# Uncomment the theme you want to use:
+# general.import = ["~/.config/sophia-techne/current/theme/alacritty.toml"]
+# general.import = ["~/.config/sophia-techne/themes/nord/alacritty.toml"]
+# general.import = ["~/.config/omarchy/current/theme/alacritty.toml"]
+
+[env]
+TERM = "xterm-256color"
+
+# ===============================================
+# Font Configuration
+# ===============================================
+[font]
+normal = { family = "CaskaydiaMono Nerd Font", style = "Regular" }
+bold = { family = "CaskaydiaMono Nerd Font", style = "Bold" }
+italic = { family = "CaskaydiaMono Nerd Font", style = "Italic" }
+bold_italic = { family = "CaskaydiaMono Nerd Font", style = "Bold Italic" }
+size = 14
+
+# ===============================================
+# Window Configuration
+# ===============================================
+[window]
+# Window startup mode
+startup_mode = "Maximized"
+
+# Window padding
+padding.x = 14
+padding.y = 14
+
+# Window opacity (0.0 - 1.0)
+opacity = 0.80
+
+# Window decorations
+# Options: "Full", "None", "Transparent", "Buttonless"
+decorations = "Full"
+
+# Dynamic window title
+dynamic_title = true
+
+# Dynamic window padding (adjust padding when resizing)
+dynamic_padding = false
+
+# ===============================================
+# Scrolling Configuration
+# ===============================================
+[scrolling]
+# Maximum number of lines in scrollback buffer
+history = 100000
+
+# Number of lines scrolled per action
+multiplier = 3
+
+# ===============================================
+# Selection Configuration
+# ===============================================
+[selection]
+# Automatically copy selection to clipboard
+save_to_clipboard = true
+
+# Characters used for word selection
+semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
+
+# ===============================================
+# Cursor Configuration
+# ===============================================
+[cursor]
+# Cursor style
+style = { shape = "Block", blinking = "On" }
+
+# Blink interval in milliseconds
+blink_interval = 750
+
+# Stop blinking after this many seconds of inactivity
+blink_timeout = 5
+
+# Hollow cursor when window loses focus
+unfocused_hollow = true
+
+# Cursor thickness (for beam/underline shapes)
+# thickness = 0.15
+
+# ===============================================
+# Bell Configuration
+# ===============================================
+[bell]
+# Visual bell animation
+animation = "EaseOutExpo"
+
+# Duration of the visual bell flash (0 to disable)
+duration = 0
+
+# Bell color
+# color = "#ffffff"
+
+# ===============================================
+# Colors Configuration (Catppuccin Mocha)
+# ===============================================
+# Uncomment to use built-in theme instead of import
+
+# [colors.primary]
+# background = "#1E1E2E"
+# foreground = "#CDD6F4"
+# dim_foreground = "#7F849C"
+# bright_foreground = "#CDD6F4"
+
+# [colors.cursor]
+# text = "#1E1E2E"
+# cursor = "#F5E0DC"
+
+# [colors.vi_mode_cursor]
+# text = "#1E1E2E"
+# cursor = "#B4BEFE"
+
+# [colors.search.matches]
+# foreground = "#1E1E2E"
+# background = "#A6ADC8"
+
+# [colors.search.focused_match]
+# foreground = "#1E1E2E"
+# background = "#A6E3A1"
+
+# [colors.hints.start]
+# foreground = "#1E1E2E"
+# background = "#F9E2AF"
+
+# [colors.hints.end]
+# foreground = "#1E1E2E"
+# background = "#A6ADC8"
+
+# [colors.selection]
+# text = "#1E1E2E"
+# background = "#F5E0DC"
+
+# [colors.normal]
+# black = "#45475A"
+# red = "#F38BA8"
+# green = "#A6E3A1"
+# yellow = "#F9E2AF"
+# blue = "#89B4FA"
+# magenta = "#F5C2E7"
+# cyan = "#94E2D5"
+# white = "#BAC2DE"
+
+# [colors.bright]
+# black = "#585B70"
+# red = "#F38BA8"
+# green = "#A6E3A1"
+# yellow = "#F9E2AF"
+# blue = "#89B4FA"
+# magenta = "#F5C2E7"
+# cyan = "#94E2D5"
+# white = "#A6ADC8"
+
+# [colors.dim]
+# black = "#45475A"
+# red = "#F38BA8"
+# green = "#A6E3A1"
+# yellow = "#F9E2AF"
+# blue = "#89B4FA"
+# magenta = "#F5C2E7"
+# cyan = "#94E2D5"
+# white = "#BAC2DE"
+
+# ===============================================
+# Keyboard Bindings
+# ===============================================
+[keyboard]
+bindings = [
+  # System keybindings
+  { key = "F11", action = "ToggleFullscreen" },
+  { key = "Return", mods = "Shift", action = "ReceiveChar" },
+
+  # Font size adjustment
+  { key = "Plus", mods = "Control", action = "IncreaseFontSize" },
+  { key = "Minus", mods = "Control", action = "DecreaseFontSize" },
+  { key = "Key0", mods = "Control", action = "ResetFontSize" },
+  { key = "Equals", mods = "Control", action = "IncreaseFontSize" },
+
+  # Copy/Paste
+  { key = "V", mods = "Control|Shift", action = "Paste" },
+  { key = "C", mods = "Control|Shift", action = "Copy" },
+  { key = "Insert", mods = "Shift", action = "Paste" },
+  { key = "Insert", mods = "Control", action = "Copy" },
+
+  # Search
+  { key = "F", mods = "Control|Shift", action = "SearchForward" },
+  { key = "B", mods = "Control|Shift", action = "SearchBackward" },
+
+  # Clear screen
+  { key = "K", mods = "Control|Shift", chars = "\u000c" },
+  { key = "L", mods = "Control", chars = "\u000c" },
+
+  # Vi mode (if using vi mode)
+  # { key = "Space", mods = "Control|Shift", mode = "~Search", action = "ToggleViMode" },
+
+  # Word navigation
+  { key = "Left", mods = "Alt", chars = "\u001bb" },   # Move backward one word
+  { key = "Right", mods = "Alt", chars = "\u001bf" },  # Move forward one word
+  { key = "Left", mods = "Control", chars = "\u001bb" },
+  { key = "Right", mods = "Control", chars = "\u001bf" },
+
+  # Line navigation
+  { key = "Left", mods = "Shift", chars = "\u001bOH" },   # Home
+  { key = "Right", mods = "Shift", chars = "\u001bOF" },  # End
+  { key = "Home", chars = "\u001bOH", mode = "AppCursor" },
+  { key = "End", chars = "\u001bOF", mode = "AppCursor" },
+
+  # Tab navigation (if using tabs in terminal multiplexer)
+  { key = "Tab", mods = "Control", chars = "\u001b[27;5;9~" },
+  { key = "Tab", mods = "Control|Shift", chars = "\u001b[27;6;9~" },
+
+  # Scrolling
+  { key = "PageUp", mods = "Shift", action = "ScrollPageUp" },
+  { key = "PageDown", mods = "Shift", action = "ScrollPageDown" },
+  { key = "Home", mods = "Shift", action = "ScrollToTop" },
+  { key = "End", mods = "Shift", action = "ScrollToBottom" },
+
+  # Quick navigation
+  { key = "K", mods = "Control|Shift", action = "ScrollLineUp" },
+  { key = "J", mods = "Control|Shift", action = "ScrollLineDown" },
+  { key = "U", mods = "Control|Shift", action = "ScrollPageUp" },
+  { key = "D", mods = "Control|Shift", action = "ScrollPageDown" },
+]
+
+# ===============================================
+# Mouse Configuration
+# ===============================================
+[mouse]
+# Hide mouse cursor when typing
+hide_when_typing = true
+
+# ===============================================
+# Hints Configuration (URL/Path detection)
+# ===============================================
+# [[hints.enabled]]
+# regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001f\u007f-\u009f<>\"\\s{-}\\^⟨⟩`]+"
+# command = "xdg-open"
+# post_processing = true
+# mouse.enabled = true
+# binding = { key = "U", mods = "Control|Shift" }
+
+# ===============================================
+# Debug Configuration
+# ===============================================
+# [debug]
+# render_timer = false
+# persistent_logging = false
+# log_level = "Warn"
+# renderer = "None"
+# print_events = false
+# highlight_damage = false
+# prefer_egl = false

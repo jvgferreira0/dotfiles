@@ -1,0 +1,19 @@
+# ===============================================
+# Baal - ZSH History Configuration
+# ===============================================
+
+HISTSIZE=1000000             # 1 million entries in memory
+SAVEHIST=1000000             # 1 million entries on disk
+HISTFILE=~/.zsh_history
+
+# History options
+setopt SHARE_HISTORY              # Share history between all sessions
+setopt HIST_IGNORE_DUPS          # Don't record duplicate entries
+setopt HIST_IGNORE_ALL_DUPS      # Delete old duplicates
+setopt HIST_REDUCE_BLANKS        # Remove extra whitespace
+setopt HIST_IGNORE_SPACE         # Don't save commands starting with space
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicates to history file
+setopt INC_APPEND_HISTORY        # Write to history immediately
+setopt HIST_EXPIRE_DUPS_FIRST    # Remove older duplicates first
+setopt HIST_FIND_NO_DUPS         # Don't display duplicates in search
+setopt HIST_VERIFY               # Show command with history expansion before running
